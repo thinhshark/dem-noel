@@ -1465,21 +1465,10 @@
       ctx.beginPath();
       ctx.ellipse(0, 2 * s, w * 0.42, 7 * s, 0, 0, Math.PI * 2);
       ctx.fill();
-      const cone = ctx.createLinearGradient(0, -h * 0.2, 0, 34 * s);
-      cone.addColorStop(0, "rgba(255, 236, 180, 0.22)");
-      cone.addColorStop(1, "rgba(255, 236, 180, 0)");
-      ctx.fillStyle = cone;
-      ctx.beginPath();
-      ctx.moveTo(-w * 0.18, -8 * s);
-      ctx.lineTo(w * 0.18, -8 * s);
-      ctx.lineTo(w * 0.55, 32 * s);
-      ctx.lineTo(-w * 0.55, 32 * s);
-      ctx.closePath();
-      ctx.fill();
       roundRect(ctx, -w / 2, -h, w, h * 0.78, 8 * s);
       ctx.fillStyle = body;
       ctx.fill();
-      roundRect(ctx, -w * 0.34, -h - (van ? 8 * s : 2 * s), w * 0.68, van ? h * 0.34 : h * 0.24, 6 * s);
+      roundRect(ctx, -w * 0.36, -h - (van ? 8 * s : 2 * s), w * 0.72, van ? h * 0.34 : h * 0.24, 6 * s);
       ctx.fillStyle = roof;
       ctx.fill();
       if (van) {
@@ -1491,12 +1480,20 @@
         ctx.lineTo(10 * s, -h - 4 * s);
         ctx.lineTo(-10 * s, -h - 4 * s);
         ctx.fill();
+        ctx.fillStyle = "#c9bfb0";
+        ctx.fillRect(-w * 0.42, -h * 0.52, w * 0.36, h * 0.42);
+        ctx.fillRect(w * 0.06, -h * 0.52, w * 0.36, h * 0.42);
+        ctx.fillStyle = "#8d8578";
+        ctx.fillRect(-w * 0.04, -h * 0.52, w * 0.08, h * 0.42);
+      } else {
+        roundRect(ctx, -w * 0.28, -h + 8 * s, w * 0.56, 14 * s, 3 * s);
+        ctx.fillStyle = "#1a2838";
+        ctx.fill();
+        ctx.fillStyle = "rgba(215, 238, 248, 0.35)";
+        ctx.fillRect(-w * 0.22, -h + 10 * s, w * 0.44, 6 * s);
       }
-      roundRect(ctx, -w * 0.26, -h + 7 * s, w * 0.52, 15 * s, 3 * s);
-      ctx.fillStyle = "#d7eef8";
-      ctx.fill();
-      this.headlight(ctx, -w * 0.28, -h * 0.22, s);
-      this.headlight(ctx, w * 0.28, -h * 0.22, s);
+      this.taillight(ctx, -w * 0.32, -h * 0.22, s);
+      this.taillight(ctx, w * 0.32, -h * 0.22, s);
       ctx.fillStyle = "#1b1f27";
       ctx.beginPath();
       ctx.arc(-w * 0.28, -6 * s, 7 * s, 0, Math.PI * 2);
@@ -1505,17 +1502,16 @@
       ctx.restore();
     }
 
-    headlight(ctx, x, y, s) {
-      const glow = ctx.createRadialGradient(x, y, 0, x, y, 16 * s);
-      glow.addColorStop(0, "rgba(255, 244, 200, 0.95)");
-      glow.addColorStop(1, "rgba(255, 244, 200, 0)");
+    taillight(ctx, x, y, s) {
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, 10 * s);
+      glow.addColorStop(0, "rgba(255, 70, 70, 0.85)");
+      glow.addColorStop(1, "rgba(255, 70, 70, 0)");
       ctx.fillStyle = glow;
       ctx.beginPath();
-      ctx.arc(x, y, 16 * s, 0, Math.PI * 2);
+      ctx.arc(x, y, 10 * s, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#fff6d2";
-      ctx.beginPath();
-      ctx.arc(x, y, 4 * s, 0, Math.PI * 2);
+      roundRect(ctx, x - 5 * s, y - 3 * s, 10 * s, 6 * s, 2 * s);
+      ctx.fillStyle = "#ff4d4d";
       ctx.fill();
     }
 
@@ -1636,7 +1632,7 @@
         : 0.45 + 0.55 * Math.abs(Math.sin(this.time * 16));
       ctx.save();
       ctx.globalAlpha = blink;
-      this.paintSanta(foot.x, foot.y, 74 * foot.scale, {
+      this.paintSanta(foot.x, foot.y, 82 * foot.scale, {
         phase: this.phase,
         lift: lift,
         slide: sliding,
@@ -1650,82 +1646,106 @@
       const ctx = this.ctx;
       ctx.save();
       ctx.translate(x, y);
-      if (anim.dead) ctx.rotate(Math.min(1, anim.dead) * 1.05);
-      if (anim.slide) {
-        ctx.translate(8, -u * 0.2);
-        ctx.rotate(-1.15);
-      } else {
-        ctx.translate(0, -anim.lift * u * 0.78);
-      }
-      const bob = !anim.slide && anim.lift < 0.08 && !anim.dead ? Math.sin(anim.phase * 2) * u * 0.035 : 0;
+      if (anim.dead) ctx.rotate(Math.min(1, anim.dead) * 0.85);
+      if (anim.slide) ctx.translate(0, -u * 0.08);
+      else ctx.translate(0, -anim.lift * u * 0.82);
+      const bob = !anim.slide && anim.lift < 0.08 && !anim.dead
+        ? Math.sin(anim.phase * 2) * u * 0.028
+        : 0;
       ctx.translate(0, bob);
-      const leg = Math.sin(anim.phase);
+      if (anim.slide) ctx.scale(1.08, 0.62);
+
+      const swing = anim.slide ? 0 : Math.sin(anim.phase);
+      const squat = anim.slide ? 0.12 : 0;
 
       ctx.fillStyle = "#2a211c";
-      if (anim.slide) {
-        roundRect(ctx, -u * 0.34, -u * 0.16, u * 0.62, u * 0.12, u * 0.04);
-        ctx.fill();
-      } else {
-        roundRect(ctx, -u * 0.24, -u * 0.3 - leg * u * 0.05, u * 0.15, u * 0.3, u * 0.04);
-        ctx.fill();
-        roundRect(ctx, u * 0.08, -u * 0.3 + leg * u * 0.05, u * 0.15, u * 0.3, u * 0.04);
-        ctx.fill();
-      }
-
-      ctx.fillStyle = "#8a5a32";
+      roundRect(ctx, -u * 0.26, -u * (0.28 - squat) - swing * u * 0.07, u * 0.16, u * 0.28, u * 0.045);
+      ctx.fill();
+      roundRect(ctx, u * 0.1, -u * (0.28 - squat) + swing * u * 0.07, u * 0.16, u * 0.28, u * 0.045);
+      ctx.fill();
+      ctx.fillStyle = "#4a2c22";
       ctx.beginPath();
-      ctx.ellipse(-u * 0.34, -u * 0.58, u * 0.15, u * 0.18, -0.45, 0, Math.PI * 2);
+      ctx.ellipse(-u * 0.18, -u * 0.02 - swing * u * 0.07, u * 0.09, u * 0.045, 0, 0, Math.PI * 2);
+      ctx.ellipse(u * 0.18, -u * 0.02 + swing * u * 0.07, u * 0.09, u * 0.045, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      roundRect(ctx, -u * 0.3, -u * 0.78, u * 0.6, u * 0.52, u * 0.12);
+      ctx.fillStyle = "#c4273a";
+      ctx.beginPath();
+      ctx.ellipse(-u * 0.34, -u * (0.58 - squat) - swing * u * 0.05, u * 0.09, u * 0.16, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(u * 0.34, -u * (0.58 - squat) + swing * u * 0.05, u * 0.09, u * 0.16, -0.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#f4f1ea";
+      ctx.beginPath();
+      ctx.arc(-u * 0.34, -u * (0.44 - squat) - swing * u * 0.05, u * 0.055, 0, Math.PI * 2);
+      ctx.arc(u * 0.34, -u * (0.44 - squat) + swing * u * 0.05, u * 0.055, 0, Math.PI * 2);
+      ctx.fill();
+
+      roundRect(ctx, -u * 0.3, -u * (0.82 - squat), u * 0.6, u * 0.56, u * 0.14);
       ctx.fillStyle = "#d7263d";
       ctx.fill();
       ctx.fillStyle = "#f4f1ea";
-      ctx.fillRect(-u * 0.3, -u * 0.34, u * 0.6, u * 0.09);
+      ctx.fillRect(-u * 0.3, -u * (0.34 - squat), u * 0.6, u * 0.09);
       ctx.fillStyle = "#1c1c1c";
-      ctx.fillRect(-u * 0.3, -u * 0.58, u * 0.6, u * 0.09);
+      ctx.fillRect(-u * 0.3, -u * (0.56 - squat), u * 0.6, u * 0.08);
       ctx.fillStyle = "#e7c36a";
-      roundRect(ctx, -u * 0.07, -u * 0.61, u * 0.14, u * 0.15, u * 0.03);
+      ctx.fillRect(-u * 0.05, -u * (0.55 - squat), u * 0.1, u * 0.06);
+
+      ctx.fillStyle = "#6b3d22";
+      ctx.beginPath();
+      ctx.ellipse(u * 0.04, -u * (0.58 - squat), u * 0.2, u * 0.22, 0.12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#4a2a16";
+      ctx.lineWidth = Math.max(1, u * 0.018);
+      ctx.stroke();
+      ctx.fillStyle = "#d7263d";
+      ctx.beginPath();
+      ctx.arc(u * 0.04, -u * (0.7 - squat), u * 0.035, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#c9a15b";
+      ctx.beginPath();
+      ctx.moveTo(u * 0.04, -u * (0.7 - squat));
+      ctx.lineTo(-u * 0.02, -u * (0.86 - squat));
+      ctx.stroke();
+
+      ctx.fillStyle = "#f4f1ea";
+      ctx.beginPath();
+      ctx.ellipse(0, -u * (0.82 - squat), u * 0.22, u * 0.09, 0, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.fillStyle = "#f2c1a0";
       ctx.beginPath();
-      ctx.arc(0, -u * 0.96, u * 0.2, 0, Math.PI * 2);
+      ctx.arc(0, -u * (0.98 - squat), u * 0.175, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#2a211c";
       ctx.beginPath();
-      ctx.arc(-u * 0.07, -u * 0.98, u * 0.025, 0, Math.PI * 2);
-      ctx.arc(u * 0.07, -u * 0.98, u * 0.025, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "rgba(214, 92, 92, 0.45)";
-      ctx.beginPath();
-      ctx.ellipse(-u * 0.12, -u * 0.9, u * 0.045, u * 0.03, 0, 0, Math.PI * 2);
-      ctx.ellipse(u * 0.12, -u * 0.9, u * 0.045, u * 0.03, 0, 0, Math.PI * 2);
+      ctx.ellipse(-u * 0.17, -u * (0.97 - squat), u * 0.048, u * 0.062, 0.25, 0, Math.PI * 2);
+      ctx.ellipse(u * 0.17, -u * (0.97 - squat), u * 0.048, u * 0.062, -0.25, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#f7f4ef";
       ctx.beginPath();
-      ctx.ellipse(0, -u * 0.84, u * 0.16, u * 0.15, 0, 0, Math.PI);
+      ctx.ellipse(0, -u * (1.02 - squat), u * 0.175, u * 0.14, 0, 0, Math.PI * 2);
       ctx.fill();
 
+      const pom = Math.sin(anim.phase * 2) * u * 0.04;
       ctx.fillStyle = "#d7263d";
       ctx.beginPath();
-      ctx.moveTo(-u * 0.2, -u * 1.08);
-      ctx.quadraticCurveTo(u * 0.34, -u * 1.42, u * 0.04, -u * 1.46);
-      ctx.lineTo(u * 0.22, -u * 1.08);
+      ctx.moveTo(-u * 0.18, -u * (1.08 - squat));
+      ctx.quadraticCurveTo(-u * 0.02, -u * (1.48 - squat), pom, -u * (1.5 - squat));
+      ctx.quadraticCurveTo(u * 0.18, -u * (1.22 - squat), u * 0.18, -u * (1.08 - squat));
       ctx.closePath();
       ctx.fill();
       ctx.fillStyle = "#f4f1ea";
-      ctx.fillRect(-u * 0.22, -u * 1.12, u * 0.46, u * 0.08);
-      const pom = Math.sin(anim.phase * 2) * u * 0.03;
+      ctx.fillRect(-u * 0.2, -u * (1.12 - squat), u * 0.4, u * 0.08);
       ctx.beginPath();
-      ctx.arc(u * 0.04 + pom, -u * 1.48, u * 0.07, 0, Math.PI * 2);
+      ctx.arc(pom, -u * (1.52 - squat), u * 0.07, 0, Math.PI * 2);
       ctx.fill();
 
       if (anim.shield) {
         ctx.strokeStyle = "rgba(255, 214, 120, 0.95)";
         ctx.lineWidth = Math.max(2, u * 0.045);
         ctx.beginPath();
-        ctx.ellipse(0, -u * 0.72, u * 0.52, u * 0.92, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -u * 0.68, u * 0.5, u * 0.9, 0, 0, Math.PI * 2);
         ctx.stroke();
       }
       ctx.restore();
